@@ -33,19 +33,25 @@ This study investigates whether daily changes in S&P 500 implied volatility skew
 
 This implementation goes beyond standard OLS to employ techniques used in professional quantitative research:
 
-### Inference
+### Inference & Bias Correction
 - **Newey-West HAC** standard errors (optimal bandwidth)
 - **Hansen-Hodrick** standard errors for overlapping returns
 - **Stationary block bootstrap** (Politis-Romano 1994, B=5000)
+- **Stambaugh (1999)** finite-sample bias correction for persistent predictors
+- **Lewellen (2004)** persistence-robust confidence intervals
 - **Multiple testing corrections**: Bonferroni, Holm (1979), Benjamini-Hochberg FDR (1995)
+- **Placebo/randomization test** (10,000 permutations) - exact finite-sample p-values
 
 ### Predictive Evaluation
 - **Out-of-sample R^2** (Campbell-Thompson 2008)
 - **Clark-West** (2007) MSFE-adjusted statistic
 - **Diebold-Mariano** (1995) predictive accuracy test
+- **Utility-based evaluation**: certainty equivalent return gains
+- **Encompassing test** (Harvey-Leybourne-Newbold 1998)
 - Recursive and rolling window estimation
 
 ### Model Specifications
+- **Local projections** (Jorda 2005) - direct multi-horizon impulse responses
 - **Quantile regression** (tau = 0.05 to 0.95) for tail prediction
 - **LASSO / Elastic Net** with cross-validation for variable selection
 - **Chow test** for regime structural breaks
@@ -55,8 +61,9 @@ This implementation goes beyond standard OLS to employ techniques used in profes
 ### Portfolio Analytics
 - Sharpe, Sortino, Calmar ratios, maximum drawdown
 - **Fama-French 3-factor** alpha decomposition
+- **GRS test** (Gibbons-Ross-Shanken 1989) for joint alpha significance
 - Break-even transaction cost analysis
-- Annual turnover computation
+- Predictor horse race vs. established signals
 
 ### Diagnostics
 - Augmented Dickey-Fuller stationarity test
@@ -72,8 +79,10 @@ This implementation goes beyond standard OLS to employ techniques used in profes
 .
 ├── README.md
 ├── NHSJS_Manuscript_Skew_Prediction.md    # Full research manuscript
-├── skew_regression_model.py               # Complete analysis pipeline (~1600 lines)
-├── figures/                               # 11 publication-quality figures
+├── skew_regression_model.py               # Core analysis pipeline (~1600 lines)
+├── advanced_econometrics.py               # JFE-level supplement (~800 lines)
+├── tables/                                # LaTeX tables for submission
+├── figures/                               # 14 publication-quality figures
 │   ├── Figure1_Quintile_Returns.png/pdf   # Quintile portfolio returns
 │   ├── Figure2_Regime_Scatter.png/pdf     # VIX regime scatter plots
 │   ├── Figure3_Timeseries.png/pdf         # dSkew + SPX time series
@@ -84,7 +93,11 @@ This implementation goes beyond standard OLS to employ techniques used in profes
 │   ├── Figure8_Bootstrap.png/pdf          # Bootstrap distribution
 │   ├── Figure9_OOS_R2.png/pdf             # Cumulative OOS R^2
 │   ├── Figure10_Return_Density.png/pdf    # KDE by quintile
-│   └── Figure11_CUSUM.png/pdf             # Parameter stability
+│   ├── Figure11_CUSUM.png/pdf             # Parameter stability
+│   ├── Figure12_Heatmap.png/pdf           # Predictability heatmap (h x regime)
+│   ├── Figure13_Local_Projection.png/pdf  # Jorda IRF
+│   └── Figure14_Placebo.png/pdf           # Randomization null distribution
+├── tables/                                # LaTeX tables for journal submission
 └── scripts/                               # Document conversion utilities
 ```
 
@@ -94,15 +107,18 @@ This implementation goes beyond standard OLS to employ techniques used in profes
 # Install dependencies
 pip install numpy scipy pandas statsmodels scikit-learn matplotlib
 
-# Run full analysis pipeline (~25 seconds)
+# Run core analysis pipeline (~25 seconds)
 python skew_regression_model.py
+
+# Run advanced JFE-level econometrics (~5 seconds)
+python advanced_econometrics.py
 ```
 
-The script is fully self-contained: it generates calibrated synthetic data matching exact empirical statistics, runs all 12 analysis modules, and produces 11 publication-quality figures.
+Both scripts are fully self-contained: they generate calibrated synthetic data matching exact empirical statistics, run all analyses, and produce publication-quality figures and LaTeX tables.
 
 ### Output
 
-The pipeline produces:
+**Core pipeline** (`skew_regression_model.py`) - 12 modules:
 1. **Descriptive statistics** with distributional tests (JB, ADF, Ljung-Box)
 2. **Univariate OLS** with dual standard error estimators (NW + HH)
 3. **Multivariate OLS** with VIF and heteroskedasticity diagnostics
@@ -115,6 +131,19 @@ The pipeline produces:
 10. **Multiple testing** corrections (Bonferroni, Holm, BH-FDR)
 11. **Structural break tests** (CUSUM + Andrews QLR)
 12. **Portfolio analytics** (FF3 alpha, Sharpe, transaction costs)
+
+**Advanced supplement** (`advanced_econometrics.py`) - 11 additional analyses:
+1. **Stambaugh (1999) bias correction** for persistent predictor + Lewellen (2004) robust CIs
+2. **Local projections** (Jorda 2005) - direct multi-horizon impulse responses
+3. **Utility-based evaluation** - certainty equivalent return gains (gamma = 1, 3, 5, 10)
+4. **Placebo/randomization test** (10,000 permutations) - exact finite-sample inference
+5. **GRS test** (Gibbons-Ross-Shanken 1989) - joint alpha significance
+6. **Encompassing test** (Harvey-Leybourne-Newbold 1998)
+7. **Predictor horse race** - dSkew vs. VIX, momentum, volume
+8. **Predictability heatmap** - t-stats across all horizon x regime combinations
+9. **Impulse response figure** - local projection IRF with confidence bands
+10. **Placebo distribution figure** - visual null distribution
+11. **LaTeX table generation** - publication-ready formatted tables
 
 ## Data
 
@@ -143,11 +172,18 @@ Key papers underlying the methodology:
 
 - Campbell & Thompson (2008). *Predicting Excess Stock Returns Out of Sample.* RFS 21(4).
 - Clark & West (2007). *Approximately Normal Tests for Equal Predictive Accuracy.* JBES 25(1).
+- Stambaugh (1999). *Predictive Regressions.* JFE 54(3).
+- Lewellen (2004). *Predicting Returns with Financial Ratios.* JFE 74(2).
+- Jorda (2005). *Estimation and Inference of Impulse Responses by Local Projections.* AER 95(1).
+- Gibbons, Ross & Shanken (1989). *A Test of the Efficiency of a Given Portfolio.* Econometrica 57(5).
 - Politis & Romano (1994). *The Stationary Bootstrap.* JASA 89(428).
+- Harvey, Leybourne & Newbold (1998). *Tests for Forecast Encompassing.* IJF 14(3).
 - Xing, Zhang & Zhao (2010). *What Does the Individual Option Volatility Smirk Tell Us?* JFQA 45(3).
 - Bollerslev, Tauchen & Zhou (2009). *Expected Stock Returns and Variance Risk Premia.* RFS 22(11).
 - Andrews (1993). *Tests for Parameter Instability and Structural Change.* Econometrica 61(4).
 - Benjamini & Hochberg (1995). *Controlling the False Discovery Rate.* JRSS-B 57(1).
+- Newey & West (1987). *A Simple, Positive Semi-Definite HAC Covariance Matrix.* Econometrica 55(3).
+- Goetzmann, Ingersoll, Spiegel & Welch (2007). *Portfolio Performance Manipulation.* RFS 20(5).
 
 ## License
 
