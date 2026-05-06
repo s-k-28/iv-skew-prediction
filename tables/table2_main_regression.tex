@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering
+\caption{Univariate Predictive Regressions: $\Delta Skew \to$ Forward Returns}
+\label{tab:main_regression}
+\begin{tabular}{lccccc}
+\hline\hline
+Horizon & $\hat{\alpha}$ (bp) & $\hat{\beta}$ (bp/vol) & $t$-stat & $p$-value & $R^2$ \\
+\hline
+1-day & 3.97 & -4.19$$ & -1.76 & 0.079 & 0.0007 \\
+5-day & 18.89 & -18.82$^{***}$ & -3.78 & $<$0.001 & 0.0034 \\
+10-day & 37.65 & -29.40$^{***}$ & -4.27 & $<$0.001 & 0.0044 \\
+\hline\hline
+\multicolumn{6}{l}{\footnotesize Newey-West HAC standard errors with $k-1$ lags.}
+\end{tabular}
+\end{table}
